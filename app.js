@@ -1,19 +1,26 @@
+const fs = require('fs');
+
 const express = require('express');
 
 const path = require('path');
 
 const {Server} = require('socket.io');
 
-const http = require('http');
+const https = require('https');
 
 const app = express();
 
-const server = http.createServer(app);
+app.use(express.static(path.join(__dirname, 'public')));
+
+const key = fs.readFileSync('cert.key');
+const cert = fs.readFileSync('cert.crt');
+
+const server = https.createServer({key, cert}, app);
 
 const io = new Server(server);
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-io.on('connection', socket => console.log('a user connected'));
-
 server.listen(3000);
+
+io.on('connection', socket => {
+    console.log('Someone connected');
+})
